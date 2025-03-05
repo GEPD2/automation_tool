@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 void help()
 {
@@ -37,10 +36,6 @@ void help()
     printf("  -d default scan\n");
     //wireshark
     printf("  -w watch live the traffic\n");
-    //
-    printf("  -e evil twin\n");
-    //
-    printf("  -m man in the middle\n");
     //nc -lnvc
     printf("  -l listen to a port\n");
     //python3 -m <port number>
@@ -364,14 +359,6 @@ int main(int argc,char* argv[])
         {
             system("sudo wireshark");
         }
-        else if(strcmp(argv[1], "-e") == 0)
-        {
-            printf("You must give an ip address,proccess aborts\n");
-        }
-        else if(strcmp(argv[1], "-m") == 0)
-        {
-            printf("You must give an ip address,proccess aborts\n");
-        }
         else if(strcmp(argv[1], "-l") == 0)
         {
             printf("You must give a port number,proccess aborts\n");
@@ -391,6 +378,11 @@ int main(int argc,char* argv[])
         else if(strcmp(argv[1], "-sd") == 0)
         {
             printf("Choose one of the following internet connections\n");
+            if(system_inf==32)
+            {
+                printf("The code isn't dynamic,some libraries aren't suported on windows and others on linux\n");
+            }
+            
         }
     }
     else if (argc == 3)
@@ -510,16 +502,6 @@ int main(int argc,char* argv[])
         else if(strcmp(argv[1], "-w") == 0)
         {
             printf("too many arguments\n");
-        }
-        else if(strcmp(argv[1], "-e") == 0)
-        {
-            //evil twin
-            printf("You must give an ip address,proccess aborts\n");
-        }
-        else if(strcmp(argv[1], "-m") == 0)
-        {
-            //man in the middle
-            printf("You must give an ip address,proccess aborts\n");
         }
         else if(strcmp(argv[1], "-l") == 0)
         {
