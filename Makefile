@@ -1,0 +1,4 @@
+networking_and_scans_automation: networking_and_scans_automation.c
+	gcc networking_and_scans_automation.c -o networking_and_scans_automation
+clean:
+	rm networking_and_scans_automation
