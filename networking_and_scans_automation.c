@@ -98,66 +98,7 @@ void check(int system_inf)
         if(a=='y' || a=='Y')
         {
             //for each tool we install it with different way because of the os that is currently running
-            if(system_inf==32)
-            {
-                //installation on windows
-                if(check_all[0]!=0)
-                {
-                    //installing nmap
-                    install=system("winget install nmap");
-                    //checking if it made it
-                    if(install==0)
-                    {
-                        printf("nmap installed\n");
-                        check_all_installed++;
-                    }
-                    else
-                    {
-                        printf("nmap couldn't get installed");
-                    }
-                }
-                else if(check_all[1]!=0) //installating wireshark
-                {
-                    install=system("winget install wireshark");
-                    //checking if it made it
-                    if(install==0)
-                    {
-                        printf("wireshark installed\n");
-                        check_all_installed++;
-                    }
-                    else
-                    {
-                        printf("wireshark couldn't get installed");
-                    }
-                }
-                else if(check_all[2]!=0)
-                {
-                    install=system("winget install python3");
-                    if(install==0)
-                    {
-                        check_all_installed++;
-                        printf("python3 installed\n");
-                    }
-                    else
-                    {
-                        printf("python3 couldn't get installed,try to install it from python.org or anywhere else\n");
-                    }
-                }
-                else if(check_all[3]!=0)
-                {
-                    install=system("winget install netcat");
-                    if(install==0)
-                    {
-                        check_all_installed++;
-                        printf("netcat installed\n");
-                    }
-                    else
-                    {
-                        printf("netcat couldn't get installed\n");
-                    }
-                }
-            }
-            else if(system_inf==64 || system_inf==28)
+            if(system_inf==0)
             {
                 //installation on linux and unix
                 if(check_all[0]!=0)
@@ -256,16 +197,9 @@ int main(int argc,char* argv[])
     int n;
     char y[0];
     char c[0];
-    //getting os information
-    #ifdef _WIN32
+    #ifdef __linux__
         //windows
-        system_inf=32;
-    #elif __linux__
-        //linux
-        system_inf=64;
-    #elif __unix__
-        //unix 
-        system_inf=28;
+        system_inf=0;
     #else
         //not in list
         system_inf=-1;
