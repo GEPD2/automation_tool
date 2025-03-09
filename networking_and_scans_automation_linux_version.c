@@ -191,12 +191,30 @@ void list_wifi_networks() {
     fclose(fp);
 }
 
+void nmap(char *ip,char command[])
+{
+    char full_command[200];
+    strcpy(full_command,command);
+    strcat (full_command, ip);
+    system(full_command);
+}
+
+void nmap_(char *ip,char *port,char command[])
+{
+    //char *full_command=command;
+    char full_command[200];
+    strcpy(full_command,command);
+    strcat (full_command, ip);
+    strcat(full_command," ");
+    strcat(full_command,"-p ");
+    strcat(full_command,port);
+    system(full_command);
+}
+
 int main(int argc,char* argv[])
 {
-    int system_inf=0;
-    int n;
-    char y[0];
-    char c[0];
+    int system_inf=0,n;
+    char y[0],c[0],*port,*ip,full_command[100];
     #ifdef __linux__
         //windows
         system_inf=0;
@@ -212,9 +230,6 @@ int main(int argc,char* argv[])
     //if you want to print what argv[1] has:printf("%s\n",argv[1]);
     //compare what 2 pointers has (the content)
     int command;
-    char *ip;
-    char full_command[200];
-    char *port;
     if(strcmp(argv[1], "-h") == 0)
     {
     //calling help() function to print everything the user needs
@@ -351,12 +366,7 @@ int main(int argc,char* argv[])
     {
         if(strcmp(argv[1], "-sO") == 0)
         {
-            //storing in a pointer the address of the argv[2]
-            ip=argv[2];
-            strcpy(full_command,"nmap -sC -sV -v ");
-            strcat (full_command, ip);
-            //executing the full_comand
-            system(full_command);
+            nmap(argv[2],"nmap -sC -sV -v ");
         }
         else if(strcmp(argv[1], "-sP") == 0)
         {
@@ -364,102 +374,47 @@ int main(int argc,char* argv[])
         }
         else if(strcmp(argv[1], "-iU") == 0)
         {
-            //storing in a pointer the address of the argv[2]
-            ip=argv[2];
-            strcpy(full_command,"nmap -sS -sU -T4 -v --traceroute ");
-            strcat (full_command, ip);
-            //executing the full_comand
-            system(full_command);
+            nmap(argv[2],"nmap -sS -sU -T4 -v --traceroute ");
         }
         else if(strcmp(argv[1], "-scs") == 0)
         {
-            //storing in a pointer the address of the argv[2]
-            ip=argv[2];
-            strcpy(full_command,"nmap -sS -sU -T4 -v -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --traceroute ");
-            strcat (full_command, ip);
-            //executing the full_comand
-            system(full_command);
+            nmap(argv[2],"nmap -sS -sU -T4 -v -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --traceroute ");
         }
         else if(strcmp(argv[1], "-sa") == 0)
         {
-            //storing in a pointer the address of the argv[2]
-            ip=argv[2];
-            strcpy(full_command,"nmap -T4 -A -v -PE -PS22,25,80 -PA21,23,80,3389 --traceroute ");
-            strcat (full_command, ip);
-            //executing the full_comand
-            system(full_command);
+            nmap(argv[2],"nmap -T4 -A -v -PE -PS22,25,80 -PA21,23,80,3389 --traceroute ");
         }
         else if(strcmp(argv[1], "-iN") == 0)
         {
-            //storing in a pointer the address of the argv[2]
-            ip=argv[2];
-            strcpy(full_command,"nmap -T4 -A -v -Pn --traceroute ");
-            strcat (full_command, ip);
-            //executing the full_comand
-            system(full_command);
+            nmap(argv[2],"nmap -T4 -A -v -Pn --traceroute ");
         }
         else if(strcmp(argv[1], "-i") == 0)
         {
-            //storing in a pointer the address of the argv[2]
-            ip=argv[2];
-            strcpy(full_command,"nmap -T4 -A -v -PE -PS22,25,80 -PA21,23,80,3389 --traceroute -sC -sV ");
-            strcat (full_command, ip);
-            //executing the full_comand
-            system(full_command);
+            nmap(argv[2],"nmap -T4 -A -v -PE -PS22,25,80 -PA21,23,80,3389 --traceroute -sC -sV ");
         }
         else if(strcmp(argv[1], "-q") == 0)
         {
-            //storing in a pointer the address of the argv[2]
-            ip=argv[2];
-            strcpy(full_command,"nmap -T4 --traceroute ");
-            strcat (full_command, ip);
-           //executing the full_comand
-            system(full_command);
+            nmap(argv[2],"nmap -T4 --traceroute ");
         }
         else if(strcmp(argv[1], "-sF") == 0)
         {
-            //storing in a pointer the address of the argv[2]
-            ip=argv[2];
-            strcpy(full_command,"nmap --script=default,safe -sS -sV -O -T4 -v -6 --traceroute ");
-            strcat (full_command, ip);
-            //executing the full_comand
-            system(full_command);
+            nmap(argv[2],"nmap --script=default,safe -sS -sV -O -T4 -v -6 --traceroute ");
         }
         else if(strcmp(argv[1], "-sdb") == 0)
         {
-            //storing in a pointer the address of the argv[2]
-            ip=argv[2];
-            strcpy(full_command,"nmap --script=default,safe -sS -sV -O -T4 -v --tracerout ");
-            strcat (full_command, ip);
-            //executing the full_comand
-            system(full_command);
+            nmap(argv[2],"nmap --script=default,safe -sS -sV -O -T4 -v --tracerout ");
         }
         else if(strcmp(argv[1], "-sA") == 0)
         {
-            //storing in a pointer the address of the argv[2]
-            ip=argv[2];
-            strcpy(full_command,"nmap -A -sS -sV -O -T4 -v --traceroute ");
-            strcat (full_command, ip);
-            //executing the full_comand
-            system(full_command);
+            nmap(argv[2],"nmap -A -sS -sV -O -T4 -v --traceroute ");
         }
         else if(strcmp(argv[1], "-d6") == 0)
         {
-            //storing in a pointer the address of the argv[2]
-            ip=argv[2];
-            strcpy(full_command,"nmap -sS -sV -O -T4 -v -6 --traceroute ");
-            strcat (full_command, ip);
-            //executing the full_comand
-            system(full_command);
+            nmap(argv[2],"nmap -sS -sV -O -T4 -v -6 --traceroute ");
         }
         else if(strcmp(argv[1], "-d") == 0)
         {
-            //storing in a pointer the address of the argv[2]
-            ip=argv[2];
-            strcpy(full_command,"mnap -sS -sV -O -T4 -v --traceroute ");
-            strcat (full_command, ip);
-            //executing the full_comand
-            system(full_command);
+            nmap(argv[2],"mnap -sS -sV -O -T4 -v --traceroute ");
         }
         else if(strcmp(argv[1], "-w") == 0)
         {
@@ -535,15 +490,7 @@ int main(int argc,char* argv[])
     {
         if(strcmp(argv[1], "-sP") == 0)
         {
-            //storing in a pointer the address of the argv[2]
-            ip=argv[2];
-            port=argv[3];
-            strcpy(full_command,"nmap -sC -sV -v ");
-            strcat (full_command, ip);
-            strcat(full_command," ");
-            strcat(full_command,"-p ");
-            strcat(full_command,port);
-            system(full_command);
+            nmap_(argv[2],argv[3],"nmap -sC -sV -v ");
         }
         else if(strcmp(argv[1], "-xs") == 0)
         {
