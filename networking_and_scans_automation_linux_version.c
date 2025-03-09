@@ -50,6 +50,8 @@ void help()
     printf("  -sd send deaufthentication packets\n");
     //
     printf("  -spA spam attack\n");
+    //
+    printf("  -sE see who is connected to a wifi, e.g 192.168.1.1/24\n");
 }
 
 void check(int system_inf)
@@ -368,6 +370,22 @@ int main(int argc,char* argv[])
             if (system_inf==0)
             {
                 list_wifi_networks();
+                printf("All connections have been listed,if you want to rescan type -r otherwise give the BISSD\nmaximun length is 150 characters\n");
+                char answer[150];
+                while(1)
+                {
+                    scanf("%s",&answer);
+                    if(strcmp(answer, "-sr"))
+                    {
+                        printf("Rescanning\n");
+                        list_wifi_networks();
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                //sending the deaufthentication packet
             }
         }
         else if(strcmp(argv[1], "-spA") == 0)
@@ -427,7 +445,7 @@ int main(int argc,char* argv[])
         }
         else if(strcmp(argv[1], "-d") == 0)
         {
-            nmap(argv[2],"mnap -sS -sV -O -T4 -v --traceroute ");
+            nmap(argv[2],"nmap -sS -sV -O -T4 -v --traceroute ");
         }
         else if(strcmp(argv[1], "-w") == 0)
         {
@@ -501,6 +519,10 @@ int main(int argc,char* argv[])
         else if(strcmp(argv[1], "-spA") == 0)
         {
             printf("You must give a port number too,proccess aborts\n");
+        }
+        else if(strcmp(argv[1], "-sE") == 0)
+        {
+            nmap(argv[2],"nmap -sn ");
         }
     }
     else if (argc==4)
