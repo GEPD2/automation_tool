@@ -239,15 +239,7 @@ int main(int argc,char* argv[])
     {
         if(strcmp(argv[1], "-sI") == 0)
         {
-            if(system_inf==32)
-            {
-                command=system("ifconfig");
-                if(command!=0)
-                {
-                    command=system("ip addr");
-                }
-            }
-            if(system_inf==64 || system_inf ==28)
+            if(system_inf==0)
             {
                 command=system("ip addr");
                 if(command !=0)
@@ -258,15 +250,7 @@ int main(int argc,char* argv[])
         }
         else if(strcmp(argv[1], "-sIm") == 0)
         {
-            if(system_inf==32)
-            {
-                command=system("arp");
-                if(command!=0)
-                {
-                    command=system("ipconfig /all");
-                }
-            }
-            if(system_inf==64 || system_inf ==28)
+            if(system_inf==60)
             {
                 command=system("arp");
                 if(command !=0)
@@ -350,16 +334,10 @@ int main(int argc,char* argv[])
         else if(strcmp(argv[1], "-sd") == 0)
         {
             printf("Choose one of the following internet connections\n");
-            if(system_inf==32)
-            {
-                printf("The code isn't dynamic,some libraries aren't suported on windows and others on linux\n");
-            }
-            else if (system_inf==64 || system_inf==28)
+            if (system_inf==0)
             {
                 list_wifi_networks();
             }
-            
-
         }
     }
     else if (argc == 3)
