@@ -173,21 +173,20 @@ void check(int system_inf)
 
 void list_wifi_networks() {
     FILE *fp;
-    char buffer[1024];  // Buffer to store the output
+    // Buffer to store the output
+    char buffer[1024];
     // Run the nmcli command to list available Wi-Fi networks
     fp = popen("nmcli device wifi list", "r");
     if (fp == NULL) {
         perror("Error executing nmcli command");
         return;
     }
-
     // Read the output of the command line by line
     printf("Available Wi-Fi networks:\n");
     while (fgets(buffer, sizeof(buffer), fp) != NULL) {
-        printf("%s", buffer);  // Print each line of the output
+        // Print each line of the output
+        printf("%s", buffer);
     }
-
-    // Close the file pointer (close the pipe)
     fclose(fp);
 }
 
@@ -337,6 +336,7 @@ int main(int argc,char* argv[])
             if (system_inf==0)
             {
                 list_wifi_networks();
+
             }
         }
     }
