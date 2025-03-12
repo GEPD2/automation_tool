@@ -239,7 +239,6 @@ void send_udp_packet(const char *target_ip, int target_port) {
     } else {
         printf("UDP packet sent to %s:%d\n", target_ip, target_port);
     }
-
     // Close the socket
     close(sock);
 }
@@ -263,13 +262,17 @@ int main(int argc,char* argv[])
     //if you want to print what argv[1] has:printf("%s\n",argv[1]);
     //compare what 2 pointers has (the content)
     int command;
-    if(strcmp(argv[1], "-h") == 0)
+    if(argc == 1)
     {
-    //calling help() function to print everything the user needs
-        help();
+        printf("No arguments given\n");
     }
-    if(argc==2)
+    else if (argc==2)
     {
+        if(strcmp(argv[1], "-h") == 0)
+        {
+        //calling help() function to print everything the user needs
+            help();
+        }
         if(strcmp(argv[1], "-sI") == 0)
         {
             if(system_inf==0)
