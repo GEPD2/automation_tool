@@ -47,8 +47,6 @@ void help()
     //
     printf("  -xm create xml bomb size given by you\n");
     //
-    printf("  -sd send deaufthentication packets\n");
-    //
     printf("  -spA spam attack\n");
     //
     printf("  -sE see who is connected to a wifi, e.g 192.168.1.1/24\n");
@@ -177,24 +175,6 @@ void check(int system_inf)
     system("rm NUL");
 }
 
-void list_wifi_networks() {
-    FILE *fp;
-    // Buffer to store the output
-    char buffer[1024];
-    // Run the nmcli command to list available Wi-Fi networks
-    fp = popen("nmcli device wifi list", "r");
-    if (fp == NULL) {
-        perror("Error executing nmcli command");
-        return;
-    }
-    // Read the output of the command line by line
-    printf("Available Wi-Fi networks:\n");
-    while (fgets(buffer, sizeof(buffer), fp) != NULL) {
-        // Print each line of the output
-        printf("%s", buffer);
-    }
-    fclose(fp);
-}
 
 void nmap(char *ip,char command[])
 {
@@ -366,30 +346,6 @@ int main(int argc,char* argv[])
         else if(strcmp(argv[1], "-xm") == 0)
         {
             printf("You must give a number,the number tells how big the bomb be\n");
-        }
-        else if(strcmp(argv[1], "-sd") == 0)
-        {
-            printf("Choose one of the following internet connections\n");
-            if (system_inf==0)
-            {
-                list_wifi_networks();
-                printf("All connections have been listed,if you want to rescan type -r otherwise give the BISSD\nmaximun length is 150 characters\n");
-                char answer[150];
-                while(1)
-                {
-                    scanf("%s",&answer);
-                    if(strcmp(answer, "-sr"))
-                    {
-                        printf("Rescanning\n");
-                        list_wifi_networks();
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                //sending the deaufthentication packet
-            }
         }
         else if(strcmp(argv[1], "-spA") == 0)
         {
