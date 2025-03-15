@@ -488,7 +488,7 @@ int main(int argc,char* argv[])
     {
         if(strcmp(argv[1], "-sP") == 0)
         {
-            nmap_(argv[2],argv[3],"nmap -sC -sV -v ");
+            nmap_(argv[2],argv[3],"nmap -sC -sV -vv ");
         }
         else if(strcmp(argv[1], "-xs") == 0)
         {
