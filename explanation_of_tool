@@ -27,4 +27,4 @@ automation tool creation,scanning hosts with nmap,xml bomb creation,xss code cre
 // instagram or any website couldn't load at all or in other ports it made it but very slowly
 // -sE argument see who is connected to a wifi, e.g 192.168.1.1/24 this will scan your wifi for any device that it uses it, ip adresses who use it are in the form of example (192.168.1.101,
 // 192.168.1.103,192.168.1.105 and so on,they have the form of 192.168.1.x or 192.168.0.x,if you use a wifi pineapple it possible will have 172.16.42.x where is a number till 255)
-// for the moment i will add the -Pn method
+// -Pn method is added in the end for the nmap scanning only
