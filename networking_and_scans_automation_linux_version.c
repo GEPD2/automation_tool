@@ -36,6 +36,8 @@ void help()
     printf("  -d6 default force ipv6\n");
     //default:mnap -sS -sV -O -T4 -v --traceroute 
     printf("  -d default scan\n");
+    // -Pn methon on nmap if it is needed
+    printf(" -Pn method if is needed,just type in the end -Pn, example ./networking_and_scans automation -i 192.168.1.1 -Pn\n");
     //wireshark
     printf("  -w watch live the traffic\n");
     //nc -lnvc
@@ -223,6 +225,19 @@ void send_udp_packet(const char *target_ip, int target_port) {
     close(sock);
 }
 
+int check_Pn(int argc,char *argv[])
+{
+    if(strcmp(argv[argc-1], "-Pn") == 0)
+    {
+        printf("Succes\n");
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
+}
+
 int main(int argc,char* argv[])
 {
     int system_inf=0,n;
@@ -241,6 +256,7 @@ int main(int argc,char* argv[])
     printf("For help type -h\n");
     //if you want to print what argv[1] has:printf("%s\n",argv[1]);
     //compare what 2 pointers has (the content)
+    int check_pn=check_Pn(argc,argv);
     int command;
     if(argc == 1)
     {
@@ -486,6 +502,61 @@ int main(int argc,char* argv[])
     }
     else if (argc==4)
     {
+        if(check_pn==0)
+        {
+            if(strcmp(argv[1], "-sO") == 0)
+            {
+                nmap(argv[2],"nmap -sC -sV -v -Pn ");
+            }
+            else if(strcmp(argv[1], "-iU") == 0)
+            {
+                nmap(argv[2],"nmap -sS -sU -T4 -v --traceroute -Pn ");
+            }
+            else if(strcmp(argv[1], "-scs") == 0)
+            {
+                nmap(argv[2],"nmap -sS -sU -T4 -v -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --traceroute -Pn ");
+            }
+            else if(strcmp(argv[1], "-sa") == 0)
+            {
+                nmap(argv[2],"nmap -T4 -A -v -PE -PS22,25,80 -PA21,23,80,3389 --traceroute -Pn ");
+            }
+            else if(strcmp(argv[1], "-iN") == 0)
+            {
+                nmap(argv[2],"nmap -T4 -A -v -Pn --traceroute -Pn ");
+            }
+            else if(strcmp(argv[1], "-i") == 0)
+            {
+                nmap(argv[2],"nmap -T4 -A -v -PE -PS22,25,80 -PA21,23,80,3389 --traceroute -sC -sV -Pn ");
+            }
+            else if(strcmp(argv[1], "-q") == 0)
+            {
+                nmap(argv[2],"nmap -T4 --traceroute -Pn ");
+            }
+            else if(strcmp(argv[1], "-sF") == 0)
+            {
+                nmap(argv[2],"nmap --script=default,safe -sS -sV -O -T4 -v -6 --traceroute -Pn ");
+            }
+            else if(strcmp(argv[1], "-sdb") == 0)
+            {
+                nmap(argv[2],"nmap --script=default,safe -sS -sV -O -T4 -v --tracerout -Pn ");
+            }
+            else if(strcmp(argv[1], "-sA") == 0)
+            {
+                nmap(argv[2],"nmap -A -sS -sV -O -T4 -v --traceroute Pn ");
+            }
+            else if(strcmp(argv[1], "-d6") == 0)
+            {
+                nmap(argv[2],"nmap -sS -sV -O -T4 -v -6 --traceroute -Pn ");
+            }
+            else if(strcmp(argv[1], "-d") == 0)
+            {
+                nmap(argv[2],"nmap -sS -sV -O -T4 -v --traceroute -Pn ");
+            }
+            else if(strcmp(argv[1], "-sE") == 0)
+            {
+                nmap(argv[2],"nmap -sn -Pn ");
+            }
+        }
         if(strcmp(argv[1], "-sP") == 0)
         {
             nmap_(argv[2],argv[3],"nmap -sC -sV -vv ");
@@ -516,10 +587,20 @@ int main(int argc,char* argv[])
             }
         }
     }
+    else if(argc==5)
+    {
+        if(strcmp(argv[1], "-sP") == 0 && check_pn==0)
+        {
+            nmap_(argv[2],argv[3],"nmap -sC -sV -vv -Pn");
+        }
+        else
+        {
+            printf("Something is you can do the -Pn method only on nmap\n");
+        }
+    }
     else
     {
         printf("Too many argumrnts\n");
     }
-    
     return 0;
 }
