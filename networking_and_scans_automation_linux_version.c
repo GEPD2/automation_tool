@@ -243,7 +243,7 @@ int main(int argc,char* argv[])
     int system_inf=0,n;
     char y[0],c[0],*port,*ip,full_command[100];
     #ifdef __linux__
-        //windows
+        //linux
         system_inf=0;
     #else
         //not in list
@@ -604,3 +604,15 @@ int main(int argc,char* argv[])
     }
     return 0;
 }
+
+/*
+Unicode obfuscation: Replace characters with visually identical Unicode ones (<script> → <scr\u0069pt>)
+
+String concatenation: Break payloads into parts and piece them together in JS ("a"+"l"+"e"+"r"+"t"(1))
+
+Base64 encoding + eval: Encode script and wrap it in eval(atob(...))
+
+Self-mutating scripts: Scripts that rewrite themselves using document.write() or setTimeout()
+
+Polyglot payloads: Ones that work across HTML, JS, and even JSON contexts
+*/
