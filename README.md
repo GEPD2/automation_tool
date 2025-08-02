@@ -27,36 +27,64 @@ chmod +x networking_and_scans_automation
 
 # Run with help flag to verify
 ./networking_and_scans_automation -h
+```
 Usage Examples 🚀
 Basic Network Scanning
-bash
+
+```bash
 # Standard vulnerability scan
 ./networking_and_scans_automation -sO 192.168.1.1
 
 # Quick scan with traceroute
 ./networking_and_scans_automation -q 10.0.0.1
+```
 Security Testing
-bash
+
+```bash
 # Generate XSS test scripts (saved to flag.txt)
 ./networking_and_scans_automation -xs flag.txt 192.168.1.10:80
 
 # Create XML bomb (size parameter 10)
 ./networking_and_scans_automation -xm 10
+```
+
 Network Utilities
-bash
+```bash
 # Start Python HTTP server on port 8000
 ./networking_and_scans_automation -c 8000
 
 # Show all network interfaces
 ./networking_and_scans_automation -sI
-Command Reference 📖
-Category	Command	Description	Example Usage
-Scanning	-sO	Standard vulnerability scan	./networking_and_scans_automation -sO 192.168.1.1
--iU	Intense scan + UDP	./networking_and_scans_automation -iU 10.0.0.1
-Security	-xs	Generate XSS test scripts	./networking_and_scans_automation -xs payload.txt target.com:80
--spA	UDP stress test	./networking_and_scans_automation -spA 192.168.1.50 53
-Utilities	-c	Start HTTP server	./networking_and_scans_automation -c 8080
--l	Netcat port listener	./networking_and_scans_automation -l 4444
+```
+## Command Reference 📖
+
+### Network Scanning
+| Command | Description | Example |
+|---------|-------------|---------|
+| `-sO`   | Standard vulnerability scan (SYN, version detection, scripts) | `./networking_and_scans_automation -sO 192.168.1.1` |
+| `-iU`   | Intense scan with UDP ports included (T4 timing) | `./networking_and_scans_automation -iU 10.0.0.1` |
+| `-scs`  | Slow comprehensive scan (all probes, traceroute) | `./networking_and_scans_automation -scs 192.168.1.0/24` |
+
+### Security Testing
+| Command | Description | Example |
+|---------|-------------|---------|
+| `-xs`   | Generate XSS test scripts (saves to specified file) | `./networking_and_scans_automation -xs payload.txt target.com:80` |
+| `-spA`  | UDP stress test (flood target with UDP packets) | `./networking_and_scans_automation -spA 192.168.1.50 53` |
+| `-xm`   | Generate XML bomb (specify size parameter) | `./networking_and_scans_automation -xm 15` |
+
+### Network Utilities
+| Command | Description | Example |
+|---------|-------------|---------|
+| `-c`    | Start Python HTTP server | `./networking_and_scans_automation -c 8000` |
+| `-l`    | Netcat port listener | `./networking_and_scans_automation -l 4444` |
+| `-sI`   | Show network interface configuration | `./networking_and_scans_automation -sI` |
+
+### Special Modes
+| Command | Description | Example |
+|---------|-------------|---------|
+| `-d6`   | IPv6 scan with version detection | `./networking_and_scans_automation -d6 2001:db8::1` |
+| `-sF`   | Force IPv6 with default NSE scripts | `./networking_and_scans_automation -sF 2001:db8::1` |
+
 Security Notice ⚠️
 This tool includes features that:
 
@@ -65,3 +93,8 @@ May generate malicious payloads (-xs, -xm)
 Can perform network stress tests (-spA)
 
 Execute privileged operations
+
+Use Responsibly:
+✓ Only test systems you own or have permission to scan
+✓ Comply with all applicable laws and regulations
+✓ Not for malicious use
