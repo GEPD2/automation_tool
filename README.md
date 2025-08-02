@@ -24,6 +24,7 @@ git clone https://github.com/yourusername/networking-scans-automation.git
 cd networking-scans-automation
 gcc networking_and_scans_automation.c -o networking_and_scans_automation
 chmod +x networking_and_scans_automation
+or you can type: make
 
 # Run with help flag to verify
 ./networking_and_scans_automation -h
