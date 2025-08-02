@@ -96,6 +96,8 @@ Can perform network stress tests (-spA)
 
 Execute privileged operations
 
+On a next update tcpdump will be added too
+
 Use Responsibly:
 ✓ Only test systems you own or have permission to scan
 ✓ Comply with all applicable laws and regulations
