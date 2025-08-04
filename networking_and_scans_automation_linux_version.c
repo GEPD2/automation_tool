@@ -113,7 +113,7 @@ void check(int os_type)
         }
     } 
 }
-//sanitize the data from argv
+//sanitize data
 int sanitize_single_arg(char *arg) {
     const char *bad_chars = "&;|`$><\\\"'";
     while (*arg) {
@@ -123,12 +123,45 @@ int sanitize_single_arg(char *arg) {
         }
         arg++;
     }
-
-    return 1;  // Valid
+    return 1;
 }
-// sanitize the data for argv[2] and argv[3] (ip and port)
+// sanitize data for const
+int sanitize_single_arg_const(const char *arg) {
+    const char *bad_chars = "&;|`$><\\\"'";
+    while (*arg) {
+        if (strchr(bad_chars, *arg)) {
+            fprintf(stderr, "Invalid character detected in input.\n");
+            return 0;
+        }
+        arg++;
+    }
+    return 1;
+}
+// santize 2 argv
 int sanitize_two_args(char *arg1, char *arg2) {
     return sanitize_single_arg(arg1) && sanitize_single_arg(arg2);
+}
+// for udp
+int sanitize_two_args_const(const char *arg1, char *arg2) {
+    return sanitize_single_arg_const(arg1) && sanitize_single_arg(arg2);
+}
+// ip validation
+int validate_ip(const char *ip) {
+    struct sockaddr_in sa;
+    return inet_pton(AF_INET, ip, &(sa.sin_addr)) == 1;
+}
+// port validation
+int validate_port(int port) {
+    if(port >=0 && port <=65535)
+    {
+        // range is correct
+        return 1;
+    }
+    else
+    {
+        fprintf(stderr, "Port is out of range\n");
+        return 0;
+    }
 }
 //nmap without a specific port
 void run_nmap(int os_type, const char *params,char *ip) {
@@ -152,14 +185,27 @@ void run_nmap(int os_type, const char *params,char *ip) {
 //nmap with specific port
 void run_nmap_port(int os_type, const char *params,char *ip,char *port) {
     const char *base_cmd = NULL;
+
     switch (os_type) {
         case 0: base_cmd = tools2[NMAP_INDEX].exec_cmd_unix; break;
         case 1: base_cmd = tools2[NMAP_INDEX].exec_cmd_win; break;
         case 2: base_cmd = tools2[NMAP_INDEX].exec_cmd_macos; break;
     }
-    if(!sanitize_two_args(ip,port))
+    if (!sanitize_two_args(ip, port))
     {
-        fprintf(stderr, "Unsafe IP address or Port provided.\n");
+        fprintf(stderr, "Unsafe port or ip address provided.\n");
+        return;
+    }
+    if (!validate_ip(ip)) {
+        fprintf(stderr, "Invalid ip address provided.\n");
+        return;
+    }
+    //converting port to int
+    int port_num = atoi(port);
+    //validating port
+    if(!validate_port(port_num))
+    {
+        fprintf(stderr, "Invalid port provided.\n");
         return;
     }
     char full_command[512];
@@ -197,14 +243,31 @@ void send_udp_packet(const char *target_ip, int target_port) {
     int sock;
     struct sockaddr_in dest;
     char message[] = "4baa6b1d158da078f8ca2bfd061fe15f46273587526ec75ba2119918a9ab504e9151650f114a834e1dd2eda3e5924a8813a02f597b7739074645bd9439b10445";
-
+    // sanitizing data
+    char port_str[6];                   // max "65535" + '\0'
+    snprintf(port_str, sizeof(port_str), "%d", target_port);
+    //validating ip
+    if(!sanitize_two_args_const(target_ip,port_str))
+    {
+        fprintf(stderr, "Unsafe port or ip address provided.\n");
+        return;
+    }
+    if (!validate_ip(target_ip)) {
+        fprintf(stderr, "Invalid ip address provided.\n");
+        return;
+    }
+    // validating port
+    if(!validate_port(target_port))
+    {
+        fprintf(stderr, "Invalid port provided.\n");
+        return;
+    }
     // Create socket
     sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock < 0) {
         perror("Socket creation failed");
         exit(1);
     }
-
     // Fill in the destination address structure
     dest.sin_family = AF_INET;
     dest.sin_port = htons(target_port);
@@ -424,6 +487,10 @@ int main(int argc,char* argv[]) {
         {
             //storing in a pointer the address of the argv[2]
             port=argv[2];
+            if (!sanitize_single_arg(port)) {
+                fprintf(stderr, "Unsafe IP address provided.\n");
+                return 1;
+            }
             strcpy(full_command,"nc -tunlp ");
             strcat (full_command, port);
             //executing the full_comand
@@ -433,6 +500,10 @@ int main(int argc,char* argv[]) {
         {
             //storing in a pointer the address of the argv[2]
             port=argv[2];
+            if (!sanitize_single_arg(port)) {
+                fprintf(stderr, "Unsafe IP address provided.\n");
+                return 1;
+            }
             strcpy(full_command,"python3 -m http.server ");
             strcat (full_command, port);
             //executing the full_comand
@@ -549,12 +620,12 @@ int main(int argc,char* argv[]) {
         }
         else
         {
-            fprintf(stderr, "Parametre not listed here\n");
+            printf("Parametre not listed here\n");
         }
     }
     else
     {
-        fprintf(stderr, "Too many argumrnts\n");
+        printf("Too many argumrnts\n");
     }
     
     return 0;
