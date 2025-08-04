@@ -113,6 +113,23 @@ void check(int os_type)
         }
     } 
 }
+//sanitize the data from argv
+int sanitize_single_arg(char *arg) {
+    const char *bad_chars = "&;|`$><\\\"'";
+    while (*arg) {
+        if (strchr(bad_chars, *arg)) {
+            fprintf(stderr, "Invalid character detected in input.\n");
+            return 0;
+        }
+        arg++;
+    }
+
+    return 1;  // Valid
+}
+// sanitize the data for argv[2] and argv[3] (ip and port)
+int sanitize_two_args(char *arg1, char *arg2) {
+    return sanitize_single_arg(arg1) && sanitize_single_arg(arg2);
+}
 //nmap without a specific port
 void run_nmap(int os_type, const char *params,char *ip) {
     const char *base_cmd = NULL;
@@ -122,7 +139,10 @@ void run_nmap(int os_type, const char *params,char *ip) {
         case 1: base_cmd = tools2[NMAP_INDEX].exec_cmd_win; break;
         case 2: base_cmd = tools2[NMAP_INDEX].exec_cmd_macos; break;
     }
-
+    if (!sanitize_single_arg(ip)) {
+        fprintf(stderr, "Unsafe IP address provided.\n");
+        return;
+    }
     char full_command[512];
     //preparing full command
     snprintf(full_command, sizeof(full_command), "%s %s %s", base_cmd, params,ip);
@@ -132,13 +152,16 @@ void run_nmap(int os_type, const char *params,char *ip) {
 //nmap with specific port
 void run_nmap_port(int os_type, const char *params,char *ip,char *port) {
     const char *base_cmd = NULL;
-
     switch (os_type) {
         case 0: base_cmd = tools2[NMAP_INDEX].exec_cmd_unix; break;
         case 1: base_cmd = tools2[NMAP_INDEX].exec_cmd_win; break;
         case 2: base_cmd = tools2[NMAP_INDEX].exec_cmd_macos; break;
     }
-
+    if(!sanitize_two_args(ip,port))
+    {
+        fprintf(stderr, "Unsafe IP address or Port provided.\n");
+        return;
+    }
     char full_command[512];
     //preparing full command
     snprintf(full_command, sizeof(full_command), "%s %s %s %s", base_cmd, params,port,ip);
@@ -526,12 +549,12 @@ int main(int argc,char* argv[]) {
         }
         else
         {
-            printf("Parametre not listed here\n");
+            fprintf(stderr, "Parametre not listed here\n");
         }
     }
     else
     {
-        printf("Too many argumrnts\n");
+        fprintf(stderr, "Too many argumrnts\n");
     }
     
     return 0;
